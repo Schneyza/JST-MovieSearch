@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Movie Releases</title>
+
+    <script type="text/javascript">
+        var d = new Date();                 //heutiges Datum
+        var month = d.getMonth() + 1;       // +1, da d.getMonth() bei 0 beginnt
+        var year = d.getFullYear();
+        var searchdates = [];
+        var monthstr = "";
+        
+        for (var i=0; i<12; i++) {
+            if (month>12) {
+                year++;
+                month%=12;
+            }
+            switch(month){
+                case 1:
+                    monthstr = "January";
+                    break;
+                case 2:
+                    monthstr = "February";
+                    break;
+                case 3:
+                    monthstr = "March";
+                    break;
+                case 4:
+                    monthstr = "April";
+                    break;
+                case 5:
+                    monthstr = "May";
+                    break;
+                case 6:
+                    monthstr = "June";
+                    break;
+                case 7:
+                    monthstr = "July";
+                    break;
+                case 8:
+                    monthstr = "August";
+                    break;
+                case 9:
+                    monthstr = "September";
+                    break;
+                case 10:
+                    monthstr = "October";
+                    break;
+                case 11:
+                    monthstr = "November";
+                    break;
+                case 12:
+                    monthstr = "December";
+                    break;
+            }
+            searchdates[i] = {"month": monthstr, "year": year.toString(), "monthnumber" : month};   //month = Monatsname(z.B. August); year = Jahresnummer(z.B 2015); monthnumber = Monatsnummer(z.B8)
+            month ++;
+        }
+        
+        //Sobald alle UI Elemente geladen sind, werden die Einträge für das DropDown Menü anhand des heutigen Datums befüllt
+        window.onload = function(){
+            var body = document.getElementsByTagName("body")[0];
+            for(var i =0;i<12;i++){
+                id = "d"+i.toString();
+                document.getElementById(id).innerHTML=(searchdates[i].month + " " + searchdates[i].year.toString());
+            }
+        };
+        
+        //sucht die im gewählten Monat erscheinenden Filme und speichert sie als JSON Objekt in der Variable movies
+        function getFilms(key) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "search-extern.php", true);            //ruft die .php Datei auf, die die Filmdaten vom Server holt
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");      //gibt die erwartete Syntax der Rückgabe vom Server an
+            var searchstring = 'action=' + searchdates[key].year + '-' + zweistellen(searchdates[key].monthnumber);     //setzt den String für den gewählten Monat zusammen
+            xhr.send(searchstring);         //sendet den String an die .php Datei
+            xhr.onload = function(){        //wird ausgefüht, sobald eine Antwort vorliegt
+                var movies = JSON.parse(xhr.responseText.toString());       //wandelt die Antwort in ein JSON Objekt um
+                console.log(movies); 
+            }   
+        }
+        
+        //stellt sicher, dass Monatsnummern zweistellig sind, da dies von der imdb API verlangt wird
+        function zweistellen(s){
+            s = s.toString();
+            while (s.length<2){
+                s = "0" + s;
+            }
+            return s;
+        }
+    </script>
+</head>
+<body>
+    <h1>Movie Releases</h1>
+    <h2>Search for movies</h2>
+    Date: <select id="Date" onchange="getFilms(this.value)">        //sobald sich ein Element ausgewählt wird, wird getFilms mit dem entsprechendem Wert aufgerufen
+        <option value="">Choose date</option>
+        <option value=0 id="d0"></option>
+        <option value=1 id="d1"></option>
+        <option value=2 id="d2"></option>
+        <option value=3 id="d3"></option>
+        <option value=4 id="d4"></option>
+        <option value=5 id="d5"></option>
+        <option value=6 id="d6"></option>
+        <option value=7 id="d7"></option>
+        <option value=8 id="d8"></option>
+        <option value=9 id="d9"></option>
+        <option value=10 id="d10"></option>
+        <option value=11 id="d11"></option>
+    </select>
+</body>
+</html>
